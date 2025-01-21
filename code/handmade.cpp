@@ -47,7 +47,7 @@ RenderWeirdGradients(win32_offscreen_buffer Buffer,int XOffset, int YOffset)
     for (int X = 0; X < Buffer.Width; ++X) {
       uint8 Blue =(X + XOffset); 
       uint8 Green =(Y + YOffset); 
-      uint8 Red =(X + XOffset); 
+      uint8 Red =(X); 
       *Pixel++ = ((Green << 8) | Blue | Red << 16);
     }
 
@@ -76,8 +76,12 @@ internal void Win32ResizeDIBSection(win32_offscreen_buffer *Buffer, int Width, i
 }
 
 internal void
-Win32CopyBufferToWindow(win32_offscreen_buffer Buffer,HDC DeviceContext, int X, int Y, int Width, int Height, int WindowWidth, int WindowHeight)
-{
+Win32DisplayBufferInWindow(
+    win32_offscreen_buffer Buffer,
+    HDC DeviceContext,
+    int WindowWidth,
+    int WindowHeight
+) {
   StretchDIBits(
     DeviceContext,
     /*X, Y, Width, Height,*/
@@ -127,15 +131,11 @@ MainWindowCallback(
     {
       PAINTSTRUCT Paint;
       HDC DeviceContext = BeginPaint(Window, &Paint);
-      int X = Paint.rcPaint.left;
-      int Y = Paint.rcPaint.top;
-      int Width = Paint.rcPaint.right - Paint.rcPaint.left;
-      int Height = Paint.rcPaint.bottom - Paint.rcPaint.top;
       win32_window_dimension WindowDimension = Win32GetWindowDimension(Window);
       RECT ClientRect;
       GetClientRect(Window, &ClientRect);
 
-      Win32CopyBufferToWindow(GlobalBackBuffer, DeviceContext, X, Y, Width, Height, WindowDimension.Width, WindowDimension.Height);
+      Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, WindowDimension.Width, WindowDimension.Height);
       EndPaint(Window, &Paint);
     } break;
     default:
@@ -202,9 +202,11 @@ int CALLBACK WinMain(
         }
 
         RenderWeirdGradients(GlobalBackBuffer, XOffset, YOffset);
+
         HDC DeviceContext = GetDC(Window);
-        win32_window_dimension WindowDimension = Win32GetWindowDimension(Window);
-        Win32CopyBufferToWindow(GlobalBackBuffer, DeviceContext, WindowDimension.Width, WindowDimension.Height,0, 0, WindowDimension.Width, WindowDimension.Height);
+
+         win32_window_dimension WindowDimension = Win32GetWindowDimension(Window);
+        Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, WindowDimension.Width, WindowDimension.Height);
         ReleaseDC(Window, DeviceContext);
 
         YOffset += 1;
