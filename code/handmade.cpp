@@ -1,5 +1,7 @@
 #include <windows.h>
 #include <stdint.h>
+#include <xinput.h>
+
 #define internal static 
 #define local_persist static 
 #define global_variable static 
@@ -199,6 +201,22 @@ int CALLBACK WinMain(
           }
           TranslateMessage(&Message);
           DispatchMessage(&Message);         
+        }
+
+        for (
+           int ControllerIndex = 0;
+           ControllerIndex < XUSER_MAX_COUNT;
+           ++ControllerIndex
+        ) {
+
+          XINPUT_STATE ControllerState;
+          /*if(XInputGetState(ControllerIndex,&ControllerState) == ERROR_SUCCESS)*/
+          /*{*/
+          /**/
+          /*} else {*/
+          /**/
+          /*}*/
+
         }
 
         RenderWeirdGradients(GlobalBackBuffer, XOffset, YOffset);
